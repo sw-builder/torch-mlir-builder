@@ -16,6 +16,12 @@ jobs:
           sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
           sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-15 0
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-15 0
-          sudo apt install -y https://github.com/sw-builder/llvm-builder/releases/download/llvmorg-15.0.6/llvm.deb
+          TEMP_DEB=`mktemp` wget -O $TEMP_DEB https://github.com/sw-builder/llvm-builder/releases/download/llvmorg-15.0.6/llvm.deb \
+            && sudo dpkg -i $TEMP_DEB \
+            && rm -rf $TEMP_DEB
       - uses: actions/checkout@v3
+      - run: |
+          [ -e torch-mlir ] \
+            && (cd torch-mlir && git pull --rebase && git checkout ${TAG} && git submodule update --init) \
+            || (git clone -b ${TAG} https://github.com/llvm/torch-mlir.git && cd torch-mlir && git submodule update --init)
 
